@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from pathlib import Path
+from backend.services.document_service import extract_text_from_pdf
 
 app = FastAPI(title="AI Document Assistant")
 
@@ -18,8 +19,10 @@ async def upload_document(file: UploadFile = File(...)):
 
     with file_path.open("wb") as buffer:
         buffer.write(await file.read())
+    extracted_text = extract_text_from_pdf(str(file_path))
 
     return {
-        "filename": file.filename,
-        "message": "Document uploaded successfully!"
+    "filename": file.filename,
+    "message": "Document uploaded and text extracted successfully!",
+    "text_length": len(extracted_text)
     }
