@@ -1,0 +1,19 @@
+# Python virtual environment
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Environment variables and secrets
+.env
+
+# VS Code settings
+.vscode/
+
+# Local uploaded documents
+data/uploads/
+
+# Vector database / local data
+data/vectorstore/
