@@ -1,5 +1,6 @@
 import faiss
 import numpy as np
+from pathlib import Path
 
 
 def create_faiss_index(embeddings: list[list[float]]) -> faiss.IndexFlatL2:
@@ -34,3 +35,26 @@ def search_faiss_index(
     distances, indices = index.search(query_vector, min(top_k, len(chunks)))
 
     return [chunks[i] for i in indices[0] if i != -1]
+
+
+def save_faiss_index(
+    index: faiss.IndexFlatL2,
+    file_path: str,
+) -> None:
+    """Save a FAISS index to disk."""
+
+    path = Path(file_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    faiss.write_index(index, str(path))
+
+
+def load_faiss_index(file_path: str) -> faiss.IndexFlatL2:
+    """Load a FAISS index from disk."""
+
+    path = Path(file_path)
+
+    if not path.exists():
+        raise FileNotFoundError(f"FAISS index not found: {file_path}")
+
+    return faiss.read_index(str(path))
