@@ -26,6 +26,12 @@ def home():
 
 @app.post("/documents/upload")
 async def upload_document(file: UploadFile = File(...)):
+    if not file.filename:
+        return {"error": "No file was selected."}
+
+    if not file.filename.lower().endswith(".pdf"):
+        return {"error": "Only PDF files are supported."}
+
     upload_dir = Path("data/uploads")
     upload_dir.mkdir(parents=True, exist_ok=True)
 
@@ -39,12 +45,11 @@ async def upload_document(file: UploadFile = File(...)):
     chunks_indexed = index_document(extracted_text)
 
     return {
-    "filename": file.filename,
-    "message": "Document uploaded and indexed successfully!",
-    "text_length": len(extracted_text),
-    "chunks_indexed": chunks_indexed,
-}
-
+        "filename": file.filename,
+        "message": "Document uploaded and indexed successfully!",
+        "text_length": len(extracted_text),
+        "chunks_indexed": chunks_indexed,
+    }
 
 @app.post("/ask")
 async def ask_question(request: QuestionRequest):
