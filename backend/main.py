@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
 from backend.services.document_service import extract_text_from_pdf
@@ -9,6 +10,13 @@ from backend.services.indexing_service import index_document
 
 
 app = FastAPI(title="AI Document Assistant")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
