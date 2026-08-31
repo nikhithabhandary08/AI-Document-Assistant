@@ -62,7 +62,8 @@ async def upload_document(file: UploadFile = File(...)):
     upload_dir = Path("data/uploads")
     upload_dir.mkdir(parents=True, exist_ok=True)
 
-    file_path = upload_dir / file.filename
+    safe_filename = Path(file.filename).name
+    file_path = upload_dir / safe_filename
     file_path.write_bytes(file_content)
 
     extracted_text = extract_text_from_pdf(str(file_path))
@@ -78,7 +79,7 @@ async def upload_document(file: UploadFile = File(...)):
     chunks_indexed = index_document(extracted_text)
 
     return {
-        "filename": file.filename,
+        "filename": safe_filename,
         "message": "Document uploaded and indexed successfully!",
         "text_length": len(extracted_text),
         "chunks_indexed": chunks_indexed,
