@@ -32,16 +32,26 @@ User question:
 Answer:
 """.strip()
 
-    response = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": MODEL_NAME,
-            "prompt": prompt,
-            "stream": False,
-        },
-        timeout=120,
-    )
+    try:
+        response = requests.post(
+            OLLAMA_URL,
+            json={
+                "model": MODEL_NAME,
+                "prompt": prompt,
+                "stream": False,
+            },
+            timeout=120,
+        )
 
-    response.raise_for_status()
+        response.raise_for_status()
+
+    except requests.ConnectionError:
+        return "Unable to connect to Ollama. Please make sure Ollama is running."
+
+    except requests.Timeout:
+        return "The AI model took too long to respond. Please try again."
+
+    except requests.RequestException:
+        return "The AI service is currently unavailable. Please try again."
 
     return response.json()["response"].strip()
