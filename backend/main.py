@@ -39,6 +39,11 @@ async def upload_document(file: UploadFile = File(...)):
         )
 
     file_content = await file.read()
+    if not file_content:
+        raise HTTPException(
+            status_code=400,
+            detail="The uploaded file is empty.",
+        )
 
     try:
         import pymupdf
