@@ -28,23 +28,42 @@ def home():
 async def upload_document(file: UploadFile = File(...)):
     if not file.filename:
         raise HTTPException(
-        status_code=400,
-        detail="No file was selected.",
-    )
+            status_code=400,
+            detail="No file was selected.",
+        )
 
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(
-        status_code=400,
-        detail="Only PDF files are supported.",
-    )
+            status_code=400,
+            detail="Only PDF files are supported.",
+        )
+
+    file_content = await file.read()
+
+    try:
+        import pymupdf
+
+        with pymupdf.open(stream=file_content, filetype="pdf") as document:
+            if document.page_count == 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail="The uploaded PDF contains no pages.",
+                )
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="The uploaded file is not a valid or readable PDF.",
+        )
 
     upload_dir = Path("data/uploads")
     upload_dir.mkdir(parents=True, exist_ok=True)
 
     file_path = upload_dir / file.filename
-
-    with file_path.open("wb") as buffer:
-        buffer.write(await file.read())
+    file_path.write_bytes(file_content)
 
     extracted_text = extract_text_from_pdf(str(file_path))
 
@@ -56,6 +75,7 @@ async def upload_document(file: UploadFile = File(...)):
         "text_length": len(extracted_text),
         "chunks_indexed": chunks_indexed,
     }
+
 
 @app.post("/ask")
 async def ask_question(request: QuestionRequest):
