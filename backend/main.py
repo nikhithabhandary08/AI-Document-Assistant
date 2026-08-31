@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
@@ -27,10 +27,16 @@ def home():
 @app.post("/documents/upload")
 async def upload_document(file: UploadFile = File(...)):
     if not file.filename:
-        return {"error": "No file was selected."}
+        raise HTTPException(
+        status_code=400,
+        detail="No file was selected.",
+    )
 
     if not file.filename.lower().endswith(".pdf"):
-        return {"error": "Only PDF files are supported."}
+        raise HTTPException(
+        status_code=400,
+        detail="Only PDF files are supported.",
+    )
 
     upload_dir = Path("data/uploads")
     upload_dir.mkdir(parents=True, exist_ok=True)
