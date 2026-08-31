@@ -67,6 +67,14 @@ async def upload_document(file: UploadFile = File(...)):
 
     extracted_text = extract_text_from_pdf(str(file_path))
 
+    if not extracted_text.strip():
+        file_path.unlink(missing_ok=True)
+
+        raise HTTPException(
+            status_code=400,
+            detail="The PDF contains no extractable text.",
+        )
+
     chunks_indexed = index_document(extracted_text)
 
     return {
